@@ -16,9 +16,15 @@ import logging
 import pickle
 from tqdm import tqdm
 from fuzzywuzzy import fuzz
+import platform
 
 
 def set_timeout(num, callback):
+    if platform.system() == 'Windows':
+        def wrap(func):
+            return func
+        return wrap
+
     def wrap(func):
         def handle(signum, frame):  
             raise RuntimeError

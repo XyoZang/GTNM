@@ -7,6 +7,12 @@ import argparse
 from tree_sitter import Parser, Language
 import pathos
 
+try:
+    from tree_sitter_languages import get_language
+    USE_PRECOMPILED = True
+except ImportError:
+    USE_PRECOMPILED = False
+
 LIT_TYPES = {
     "java": [
         ["string_literal"],
@@ -27,7 +33,12 @@ class Normalizer(object):
     def __init__(self, language):
         self.language = language
         self.parser = Parser()
-        self.parser.set_language(Language("/data4/liufang/GTNM/data_processing/my-languages.so", language))
+        if USE_PRECOMPILED:
+            self.parser.set_language(get_language(language))
+        else:
+            import os
+            lib_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'my-languages.so')
+            self.parser.set_language(Language(lib_path, language))
         self.lit_types = LIT_TYPES[language]
 
     def get_tokens(self, node, tokens, types):
