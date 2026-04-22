@@ -9,22 +9,46 @@ import json
 import re
 import argparse
 from tree_sitter import Parser, Language
+try:
+    from tree_sitter_languages import get_language
+    USE_PRECOMPILED = True
+except ImportError:
+    USE_PRECOMPILED = False
 from java_parser import JavaParser
 import pathos
 
-Language.build_library(
-  # Store the library in the `build` directory
-  'my-languages.so',
+if USE_PRECOMPILED:
+    try:
+        JAVAPARSER = Parser()
+        JAVAPARSER.set_language(get_language('java'))
+        jp = JavaParser(parser=JAVAPARSER)
+        print("✓ Successfully loaded Java parser from tree_sitter_languages")
+    except ValueError as e:
+        print(f"✗ Version incompatible: {e}")
+        print("  Try: pip install tree-sitter-languages==1.0.3")
+        USE_PRECOMPILED = False
 
-  # Include one or more languages
-  [
-    'tree-sitter-java',
-  ]
-)
+if not USE_PRECOMPILED:
+    LIB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'my-languages.so')
 
-JAVAPARSER = Parser()
-JAVAPARSER.set_language(Language("my-languages.so", "java"))
-jp = JavaParser(parser=JAVAPARSER)
+    if os.path.exists(LIB_PATH):
+        try:
+            JAVAPARSER = Parser()
+            JAVAPARSER.set_language(Language(LIB_PATH, "java"))
+            jp = JavaParser(parser=JAVAPARSER)
+            print(f"✓ Successfully loaded Java parser from {LIB_PATH}")
+        except Exception as e:
+            print(f"✗ Failed to load library: {e}")
+            raise
+    else:
+        print(f"⚠ Building tree-sitter-java library at {LIB_PATH} ...")
+        Language.build_library(
+            LIB_PATH,
+            ['tree-sitter-java',]
+        )
+        JAVAPARSER = Parser()
+        JAVAPARSER.set_language(Language(LIB_PATH, "java"))
+        jp = JavaParser(parser=JAVAPARSER)
 
 PARSER = None
 sp_parser = None

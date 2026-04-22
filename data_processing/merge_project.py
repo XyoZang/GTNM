@@ -38,13 +38,13 @@ if __name__ == "__main__":
     eval_data = []
     test_data = []
 
-    projects = os.listdir(os.path.join(args.data_path, "training"))
+    projects = [p for p in os.listdir(os.path.join(args.data_path, "training")) if os.path.isdir(os.path.join(args.data_path, "training", p))]
     for project_name in tqdm(projects):
         train_data.append(get_project_data(os.path.join(args.data_path, "training", project_name)))
-    projects = os.listdir(os.path.join(args.data_path, "validation"))
+    projects = [p for p in os.listdir(os.path.join(args.data_path, "validation")) if os.path.isdir(os.path.join(args.data_path, "validation", p))]
     for project_name in tqdm(projects):
         eval_data.append(get_project_data(os.path.join(args.data_path, "validation", project_name)))
-    projects = os.listdir(os.path.join(args.data_path, "test"))
+    projects = [p for p in os.listdir(os.path.join(args.data_path, "test")) if os.path.isdir(os.path.join(args.data_path, "test", p))]
     for project_name in tqdm(projects):
         test_data.append(get_project_data(os.path.join(args.data_path, "test", project_name)))
     pickle.dump(train_data, open(args.save_path+'java-small-train.pkl', "wb"))
