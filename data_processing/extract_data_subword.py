@@ -568,91 +568,77 @@ class localContext(object):
             doc_data = pickle.load(open(os.path.join(self.datapath, state+"_doc.pkl"), "rb"))
             invoked_data = pickle.load(open(os.path.join(self.datapath, state+"_invoked.pkl"), "rb"))
             target_data = pickle.load(open(os.path.join(self.datapath, state+"_tag.pkl"), "rb"))
-            self._data_cache[cache_key] = (body_data, pro_data, doc_data, invoked_data, target_data)
-            print("[CACHE] Data loaded and cached for {}".format(cache_key))
+
+            dec_inp_data, dec_tgt_data = self.get_dec_inp_targ_seqs(target_data, self.tgt_name_len)
+
+            print("[CACHE] Converting to numpy arrays (one-time)...")
+            body_np = np.array(self.pad_data(body_data, self.body_context_size), dtype=np.int32)
+            pro_np = np.array(self.pad_data(pro_data, self.project_context_size, True), dtype=np.int32)
+            doc_np_raw = self.pad_data(doc_data, self.doc_context_size, True)
+            if len(doc_np_raw) == 0 or all(len(x) == 0 for x in doc_np_raw):
+                doc_np = np.zeros((len(target_data), self.doc_context_size), dtype=np.int32)
+            else:
+                doc_np = np.array(doc_np_raw, dtype=np.int32)
+            invoked_np = np.array(self.pad_invoked_data(invoked_data, self.project_context_size, True), dtype=np.float32)
+            dec_inp_np = np.array(self.pad_data(dec_inp_data, self.tgt_name_len), dtype=np.int32)
+            dec_tgt_np = np.array(self.pad_data(dec_tgt_data, self.tgt_name_len), dtype=np.int32)
+
+            n_samples = len(target_data)
+            batch_len_val = int(n_samples // batch_size)
+            usable = batch_len_val * batch_size
+
+            self._data_cache[cache_key] = {
+                'raw_body': body_data, 'raw_pro': pro_data, 'raw_doc': doc_data,
+                'raw_invoked': invoked_data, 'raw_target': target_data,
+                'body': body_np[:usable], 'pro': pro_np[:usable], 'doc': doc_np[:usable],
+                'invoked': invoked_np[:usable], 'dec_inp': dec_inp_np[:usable], 'dec_tgt': dec_tgt_np[:usable],
+                'n_samples': n_samples, 'batch_len': batch_len_val,
+            }
+            print("[CACHE] Data preprocessed and cached: {} samples, {} batches".format(n_samples, batch_len_val))
         else:
-            print("[CACHE HIT] Using cached data for {}".format(cache_key))
-            body_data, pro_data, doc_data, invoked_data, target_data = self._data_cache[cache_key]
+            print("[CACHE HIT] Using preprocessed data for {}".format(cache_key))
 
-        # if state == 'train0' or 'train_2k' or state=='in_test' or state == 'test_subword' or state == 'test':
-        #     body_data = pickle.load(open(os.path.join(self.datapath, state+"_body.pkl"), "rb"))
-        #     pro_data = pickle.load(open(os.path.join(self.datapath, state+"_pro.pkl"), "rb"))
-        #     doc_data = pickle.load(open(os.path.join(self.datapath, state+"_doc.pkl"), "rb"))
-        #     invoked_data = pickle.load(open(os.path.join(self.datapath, state+"_invoked.pkl"), "rb"))
-        #     target_data = pickle.load(open(os.path.join(self.datapath, state+"_tag.pkl"), "rb"))
+        cached = self._data_cache[cache_key]
+        body_np = cached['body']
+        pro_np = cached['pro']
+        doc_np = cached['doc']
+        invoked_np = cached['invoked']
+        dec_inp_np = cached['dec_inp']
+        dec_tgt_np = cached['dec_tgt']
+        target_data = cached['raw_target']
+        batch_len_val = cached['batch_len']
 
-        # else:
-        #     body_data = []
-        #     pro_data = []
-        #     target_data = []
-        #     for sta in ['train']:
-        #         body_data.extend(pickle.load(open(os.path.join(self.datapath, sta+ "{}_body.pkl".format(2*(epoch%4))), "rb")))
-        #         pro_data.extend(pickle.load(open(os.path.join(self.datapath, sta+"{}_pro.pkl".format(2*(epoch%4))), "rb")))
-        #         target_data.extend(pickle.load(open(os.path.join(self.datapath, sta+"{}_tag.pkl".format(2*(epoch%4))), "rb")))
-
-        #         body_data.extend(pickle.load(open(os.path.join(self.datapath, sta+ "{}_body.pkl".format(2*(epoch%4)+1)), "rb")))
-        #         pro_data.extend(pickle.load(open(os.path.join(self.datapath, sta+"{}_pro.pkl".format(2*(epoch%4)+1)), "rb")))
-        #         target_data.extend(pickle.load(open(os.path.join(self.datapath, sta+"{}_tag.pkl".format(2*(epoch%4)+1)), "rb")))
-                
         print(len(target_data))
-        assert len(body_data) == len(pro_data) == len(target_data)
 
         if shuffle:
-            body_data = [x[:] for x in body_data]
-            pro_data = [x[:] for x in pro_data]
-            doc_data = [x[:] for x in doc_data]
-            target_data = [x[:] for x in target_data]
-            invoked_data = [x[:] for x in invoked_data]
-            np.random.seed(seed + (epoch if epoch is not None else 0))
-            np.random.shuffle(body_data)
-            np.random.shuffle(pro_data)
-            np.random.shuffle(doc_data)
-            np.random.shuffle(target_data)
-            np.random.shuffle(invoked_data)
-            
-        dec_inp_data, dec_tgt_data = self.get_dec_inp_targ_seqs(target_data, self.tgt_name_len)
+            rng = np.random.RandomState(seed + (epoch if epoch is not None else 0))
+            indices = rng.permutation(len(body_np))
+            body_np = body_np[indices]
+            pro_np = pro_np[indices]
+            doc_np = doc_np[indices]
+            invoked_np = invoked_np[indices]
+            dec_inp_np = dec_inp_np[indices]
+            dec_tgt_np = dec_tgt_np[indices]
 
-        body_data = self.pad_data(body_data, self.body_context_size)
-        pro_data = self.pad_data(pro_data, self.project_context_size, True)
-        doc_data = self.pad_data(doc_data, self.doc_context_size, True)
-        invoked_data = self.pad_invoked_data(invoked_data, self.project_context_size, True)
-        dec_inp_data = self.pad_data(dec_inp_data, self.tgt_name_len)
-        dec_tgt_data = self.pad_data(dec_tgt_data, self.tgt_name_len)
-        
-        
-        batch_len = int(len(target_data) // batch_size)
-        print(batch_len)
+        all_body = body_np.reshape(batch_size, batch_len_val * self.body_context_size)
+        all_pro = pro_np.reshape(batch_size, batch_len_val * self.project_context_size)
+        all_doc = doc_np.reshape(batch_size, batch_len_val * self.doc_context_size)
+        all_invoked = invoked_np.reshape(batch_size, batch_len_val * self.project_context_size)
+        all_dec_inp = dec_inp_np.reshape(batch_size, batch_len_val * self.tgt_name_len)
+        all_dec_tgt = dec_tgt_np.reshape(batch_size, batch_len_val * self.tgt_name_len)
 
-        self.batch_len = batch_len
+        print(batch_len_val)
+        self.batch_len = batch_len_val
 
-        all_body_data = body_data[:(batch_len * batch_size)]
-        all_pro_data = pro_data[:(batch_len * batch_size)]
-        all_doc_data = doc_data[:(batch_len * batch_size)]
-        if len(all_doc_data) == 0:
-            all_doc_data = np.zeros((batch_len * batch_size, self.doc_context_size), dtype=np.int32)
-        all_invoked_data = invoked_data[:(batch_len * batch_size)]
-        all_target_data = target_data[:(batch_len * batch_size)]
-        all_dec_inp_data = dec_inp_data[:(batch_len * batch_size)]
-        all_dec_tgt_data = dec_tgt_data[:(batch_len * batch_size)]
+        for i in range(batch_len_val):
+            body_batch = all_body[:, i * self.body_context_size:(i + 1) * self.body_context_size]
+            pro_batch = all_pro[:, i * self.project_context_size:(i + 1) * self.project_context_size]
+            doc_batch = all_doc[:, i * self.doc_context_size:(i + 1) * self.doc_context_size]
+            invoked_batch = all_invoked[:, i * self.project_context_size:(i + 1) * self.project_context_size]
+            dec_inp_batch = all_dec_inp[:, i * self.tgt_name_len:(i + 1) * self.tgt_name_len]
+            dec_tgt_batch = all_dec_tgt[:, i * self.tgt_name_len:(i + 1) * self.tgt_name_len]
 
-        all_body_data = np.reshape(all_body_data, (batch_size, batch_len * self.body_context_size))
-        all_pro_data = np.reshape(all_pro_data, (batch_size, batch_len * self.project_context_size))
-        all_doc_data = np.reshape(all_doc_data, (batch_size, batch_len * self.doc_context_size))
-        all_invoked_data = np.reshape(all_invoked_data, (batch_size, batch_len * self.project_context_size))
-        
-        all_dec_inp_data = np.reshape(all_dec_inp_data, (batch_size, batch_len * self.tgt_name_len))
-        all_dec_tgt_data = np.reshape(all_dec_tgt_data, (batch_size, batch_len * self.tgt_name_len))
-
-        for i in range(batch_len):
-            # print('batch %d'%i)
-            body_batch = all_body_data[:, i * self.body_context_size:(i + 1) * self.body_context_size]
-            pro_batch = all_pro_data[:, i * self.project_context_size:(i + 1) * self.project_context_size]
-            doc_batch = all_doc_data[:, i * self.doc_context_size:(i + 1) * self.doc_context_size]
-            invoked_batch = all_invoked_data[:, i * self.project_context_size:(i + 1) * self.project_context_size]
-            dec_inp_batch = all_dec_inp_data[:, i * self.tgt_name_len:(i + 1) * self.tgt_name_len]
-            dec_tgt_batch = all_dec_tgt_data[:, i * self.tgt_name_len:(i + 1) * self.tgt_name_len]
-
-            yield body_batch, pro_batch, doc_batch, dec_inp_batch, dec_tgt_batch, invoked_batch, batch_len
+            yield body_batch, pro_batch, doc_batch, dec_inp_batch, dec_tgt_batch, invoked_batch, batch_len_val
 
 
 def parse_args():
