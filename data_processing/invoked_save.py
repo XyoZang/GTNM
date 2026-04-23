@@ -1,5 +1,6 @@
 import pickle
 import os
+import sys
 from tqdm import tqdm
 
 def extract_invoked_data(data_path, prefix):
@@ -19,4 +20,7 @@ def extract_invoked_data(data_path, prefix):
         invoked.append(invoked_data)
     pickle.dump(invoked, open(os.path.join(data_path, prefix+'_invoked.pkl'), "wb"))
 
-extract_invoked_data('/data4/liufang/GTNM/', 'train_subword')
+if __name__ == "__main__":
+    data_path = sys.argv[1] if len(sys.argv) > 1 else './predata'
+    prefix = sys.argv[2] if len(sys.argv) > 2 else 'train_subword'
+    extract_invoked_data(data_path, prefix)
