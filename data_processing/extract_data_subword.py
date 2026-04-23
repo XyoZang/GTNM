@@ -128,12 +128,8 @@ class localContext(object):
         self.BOS = self.w2id[custom_bos]
         self.EOS = self.w2id[custom_eos]
         self.PAD = self.w2id[custom_pad]
-        # self.END_OF_LINE = self.sp_model.PieceToId(custom_eol)
-        # self.END_OF_TEXT = self.sp_model.PieceToId(custom_eot)
-        # self.BOS = self.sp_model.PieceToId(custom_bos)
-        # self.EOS = self.sp_model.PieceToId(custom_eos)
-        # self.PAD = self.sp_model.PieceToId(custom_pad)
         self.datapath = datapath
+        self._data_cache = {}
 
     def read_as_pkl(self, filename):
         data = pickle.load(open(filename, "rb"))
@@ -564,11 +560,19 @@ class localContext(object):
         return pad_data
 
     def batch_iter(self, batch_size, state, epoch=None, shuffle=True, seed=12345):
-        body_data = pickle.load(open(os.path.join(self.datapath, state+"_body.pkl"), "rb"))
-        pro_data = pickle.load(open(os.path.join(self.datapath, state+"_pro.pkl"), "rb"))
-        doc_data = pickle.load(open(os.path.join(self.datapath, state+"_doc.pkl"), "rb"))
-        invoked_data = pickle.load(open(os.path.join(self.datapath, state+"_invoked.pkl"), "rb"))
-        target_data = pickle.load(open(os.path.join(self.datapath, state+"_tag.pkl"), "rb"))
+        cache_key = state
+        if cache_key not in self._data_cache:
+            print("[CACHE MISS] Loading data for {} from disk...".format(cache_key))
+            body_data = pickle.load(open(os.path.join(self.datapath, state+"_body.pkl"), "rb"))
+            pro_data = pickle.load(open(os.path.join(self.datapath, state+"_pro.pkl"), "rb"))
+            doc_data = pickle.load(open(os.path.join(self.datapath, state+"_doc.pkl"), "rb"))
+            invoked_data = pickle.load(open(os.path.join(self.datapath, state+"_invoked.pkl"), "rb"))
+            target_data = pickle.load(open(os.path.join(self.datapath, state+"_tag.pkl"), "rb"))
+            self._data_cache[cache_key] = (body_data, pro_data, doc_data, invoked_data, target_data)
+            print("[CACHE] Data loaded and cached for {}".format(cache_key))
+        else:
+            print("[CACHE HIT] Using cached data for {}".format(cache_key))
+            body_data, pro_data, doc_data, invoked_data, target_data = self._data_cache[cache_key]
 
         # if state == 'train0' or 'train_2k' or state=='in_test' or state == 'test_subword' or state == 'test':
         #     body_data = pickle.load(open(os.path.join(self.datapath, state+"_body.pkl"), "rb"))
@@ -594,22 +598,23 @@ class localContext(object):
         assert len(body_data) == len(pro_data) == len(target_data)
 
         if shuffle:
-            np.random.seed(seed)
+            body_data = [x[:] for x in body_data]
+            pro_data = [x[:] for x in pro_data]
+            doc_data = [x[:] for x in doc_data]
+            target_data = [x[:] for x in target_data]
+            invoked_data = [x[:] for x in invoked_data]
+            np.random.seed(seed + (epoch if epoch is not None else 0))
             np.random.shuffle(body_data)
-            np.random.seed(seed)
             np.random.shuffle(pro_data)
-            np.random.seed(seed)
             np.random.shuffle(doc_data)
-            np.random.seed(seed)
             np.random.shuffle(target_data)
-            np.random.seed(seed)
             np.random.shuffle(invoked_data)
             
         dec_inp_data, dec_tgt_data = self.get_dec_inp_targ_seqs(target_data, self.tgt_name_len)
 
         body_data = self.pad_data(body_data, self.body_context_size)
         pro_data = self.pad_data(pro_data, self.project_context_size, True)
-        doc_data = self.pad_data(pro_data, self.doc_context_size, True)
+        doc_data = self.pad_data(doc_data, self.doc_context_size, True)
         invoked_data = self.pad_invoked_data(invoked_data, self.project_context_size, True)
         dec_inp_data = self.pad_data(dec_inp_data, self.tgt_name_len)
         dec_tgt_data = self.pad_data(dec_tgt_data, self.tgt_name_len)
@@ -623,6 +628,8 @@ class localContext(object):
         all_body_data = body_data[:(batch_len * batch_size)]
         all_pro_data = pro_data[:(batch_len * batch_size)]
         all_doc_data = doc_data[:(batch_len * batch_size)]
+        if len(all_doc_data) == 0:
+            all_doc_data = np.zeros((batch_len * batch_size, self.doc_context_size), dtype=np.int32)
         all_invoked_data = invoked_data[:(batch_len * batch_size)]
         all_target_data = target_data[:(batch_len * batch_size)]
         all_dec_inp_data = dec_inp_data[:(batch_len * batch_size)]

@@ -4,6 +4,7 @@ class Hparams:
     parser = argparse.ArgumentParser()
     # prepro
     # parser.add_argument('--vocab_size', default=50000, type=int)
+    parser.add_argument('--vocab_size', default=50000, type=int)
     parser.add_argument('--gpu', default='0', help='gpu id')
 
     parser.add_argument('--sub_word_vocab_file', default='./data_processing/sub_token_w2id.txt',

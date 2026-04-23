@@ -2,6 +2,7 @@
 #/usr/bin/python3
 import sys
 import os
+os.environ['TF_FORCE_GPU_ALLOW_GROWTH'] = 'true'
 
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data_processing"))
 
@@ -80,6 +81,11 @@ def train():
     print("  Using Project Context (--pro): {}".format(hp.pro))
     print("=" * 70)
     print()
+
+    gpu_config = tf.ConfigProto()
+    gpu_config.gpu_options.allow_growth = True
+    gpu_config.allow_soft_placement = True
+    gpu_config.graph_options.optimizer_options.global_jit_level = tf.OptimizerOptions.ON_1
 
     with tf.Session(config=gpu_config) as sess:
         sess.run(tf.global_variables_initializer())
