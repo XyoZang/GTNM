@@ -263,7 +263,7 @@ class Transformer:
 
         global_step = tf.train.get_or_create_global_step()
         lr = noam_scheme(self.hp.lr, global_step, self.hp.warmup_steps)
-        optimizer = tf.train.AdamOptimizer(lr)
+        optimizer = tf.compat.v1.train.AdamOptimizer(lr)
         train_op = optimizer.minimize(loss, global_step=global_step)
 
         tf.summary.scalar('lr', lr)

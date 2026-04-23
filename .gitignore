@@ -1,9 +1,5 @@
 
 .idea/
-
 .predata/
-
-data_processing/__pycache__/
-
 predata/
-data_processing/__pycache__/normalizer.cpython-37.pyc
+*.pyc

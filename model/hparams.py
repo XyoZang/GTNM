@@ -23,7 +23,7 @@ class Hparams:
     parser.add_argument('--logdir', default="./saved", help="log directory")
     parser.add_argument('--num_epochs', default=50, type=int)
     parser.add_argument('--save_epochs', default=3, type=int)
-    parser.add_argument('--evaldir', default="/data4/liufang/GTNM/", help="evaluation dir")
+    parser.add_argument('--evaldir', default="./", help="evaluation dir")
 
     parser.add_argument('--body_context_size', default=55, type=int,
                         help="body_context_size")

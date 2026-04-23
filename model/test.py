@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 #/usr/bin/python3
-import sys 
-sys.path.append("../data_processing/") 
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data_processing"))
 
 import tensorflow as tf
 # from new_data_loader import *
 from model_invoked import Transformer
 from extract_data_subword import *
 from utils import save_hparams, save_variable_specs, get_hypotheses, calc_bleu
-import os
 from hparams import Hparams
 import math
 import logging
@@ -26,7 +26,7 @@ outfile = hp.res_log
 
 def test():
     resout = open(outfile, 'a')
-    
+
     logging.info("# Load model")
     m = Transformer(hp)
     y_hat = m.eval()
@@ -44,7 +44,7 @@ def test():
         test_hypotheses, test_precision, test_recall, test_f1, test_acc = get_hypotheses('test_subword', hp, sess, m, y_hat, m.data.w2id, m.data.id2w)
         print('test precision {}, test recall {}, test f1 {}, test acc {}'.format(test_precision, test_recall, test_f1, test_acc), file=resout)
         resout.flush()
-    
+
     summary_writer.close()
     resout.close()
 
@@ -53,5 +53,3 @@ def main(_):
 
 if __name__ == '__main__':
     tf.app.run()
-
-
