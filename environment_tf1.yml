@@ -1,0 +1,19 @@
+name: GTNM
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - python=3.8
+  - cudatoolkit=11.1
+  - cudnn=8.0.5 # for cuda 11.1 手动替换安装
+  - tensorflow-gpu=1.15.4 #社区版
+  # 社区版需手动安装依赖
+  # pip install -i https://pypi.tuna.tsinghua.edu.cn/simple/ numpy==1.18.5 astor==0.8.1 google-pasta==0.2.0 grpcio==1.37.0 keras-applications==1.0.8 keras-preprocessing==1.1.2 opt-einsum==3.3.0 tensorboard==1.15.0 tensorflow-estimator==1.15.1 termcolor==1.1.0 wrapt==1.12.1 mock==3.0.5 requests==2.23.0
+  - pip
+  - pip:
+    - sentencepiece==0.1.85
+    - tree-sitter
+    - tree-sitter-languages
+    - pathos==0.2.8
+    - tqdm==4.36.1
+    - fuzzywuzzy==0.17.0
