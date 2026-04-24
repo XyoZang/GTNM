@@ -1,3 +1,5 @@
 .trae/
 data_processed/
 *.pyc
+saved/
+res.txt

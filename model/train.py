@@ -81,12 +81,12 @@ def train():
         else:
             saver.restore(sess, ckpt)
 
-        summary_writer = tf.summary.FileWriter(hp.logdir, sess.graph)
+        summary_writer = tf.compat.v1.summary.FileWriter(hp.logdir, sess.graph)
         best_eval_val_f1 = 0
         for i in range(hp.num_epochs):
-            
-            train_loss, _global_step, _preds, _tgt = run_epoch(sess, m, 'train_subword0', summary_writer, epoch=i)
-            _, train_precision, train_recall, train_f1, train_acc = get_hypotheses('train_subword0', hp, sess, m, y_hat, m.data.w2id, m.data.id2w, epoch=i)
+
+            train_loss, _global_step, _preds, _tgt = run_epoch(sess, m, 'train_subword', summary_writer, epoch=i)
+            _, train_precision, train_recall, train_f1, train_acc = get_hypotheses('train_subword', hp, sess, m, y_hat, m.data.w2id, m.data.id2w, epoch=i)
             print('epoch {}: train precision {}, train recall {}, train f1 {}, train acc {}'.format(i+1, train_precision, train_recall, train_f1, train_acc))
             
 

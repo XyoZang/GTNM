@@ -27,7 +27,7 @@ def ln(inputs, epsilon = 1e-8, scope="ln"):
         inputs_shape = inputs.get_shape()
         params_shape = inputs_shape[-1:]
 
-        mean, variance = tf.nn.moments(inputs, [-1], keep_dims=True)
+        mean, variance = tf.nn.moments(inputs, [-1], keepdims=True)
         beta= tf.compat.v1.get_variable("beta", params_shape, initializer=tf.zeros_initializer())
         gamma = tf.compat.v1.get_variable("gamma", params_shape, initializer=tf.ones_initializer())
         normalized = (inputs - mean) / ( (variance + epsilon) ** (.5) )
@@ -108,7 +108,7 @@ def scaled_dot_product_attention(Q, K, V, key_masks,
         # softmax
         outputs = tf.nn.softmax(outputs)
         attention = tf.transpose(outputs, [0, 2, 1])
-        tf.summary.image("attention", tf.expand_dims(attention[:1], -1))
+        tf.compat.v1.summary.image("attention", tf.expand_dims(attention[:1], -1))
 
         # # query masking
         # outputs = mask(outputs, Q, K, type="query")

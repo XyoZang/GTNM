@@ -270,11 +270,11 @@ class Transformer:
         optimizer = tf.compat.v1.train.AdamOptimizer(lr)
         train_op = optimizer.minimize(loss, global_step=global_step)
 
-        tf.summary.scalar('lr', lr)
-        tf.summary.scalar("loss", loss)
-        tf.summary.scalar("global_step", global_step)
+        tf.compat.v1.summary.scalar('lr', lr)
+        tf.compat.v1.summary.scalar("loss", loss)
+        tf.compat.v1.summary.scalar("global_step", global_step)
 
-        summaries = tf.summary.merge_all()
+        summaries = tf.compat.v1.summary.merge_all()
 
         return loss, train_op, global_step, summaries, preds
 

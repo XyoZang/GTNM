@@ -11,7 +11,7 @@ class Hparams:
     parser.add_argument('--doc_vocab_file', default='data_processing/doc_w2id.txt',
                         help="vocabulary file path")
 
-    parser.add_argument('--data_path', default='./',
+    parser.add_argument('--data_path', default='data_processed/',
                         help="data path")
 
     # training scheme

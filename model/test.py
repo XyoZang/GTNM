@@ -40,7 +40,7 @@ def test():
         ckpt = tf.compat.v1.train.latest_checkpoint(hp.logdir)
         saver.restore(sess, ckpt)
 
-        summary_writer = tf.summary.FileWriter(hp.logdir, sess.graph)
+        summary_writer = tf.compat.v1.summary.FileWriter(hp.logdir, sess.graph)
 
         # test
         test_hypotheses, test_precision, test_recall, test_f1, test_acc = get_hypotheses('test_subword', hp, sess, m, y_hat, m.data.w2id, m.data.id2w)
