@@ -9,7 +9,7 @@ import json
 import re
 import argparse
 from tree_sitter import Parser, Language
-from java_parser import JavaParser
+from data_processing.java_parser import JavaParser
 import pathos
 
 Language.build_library(

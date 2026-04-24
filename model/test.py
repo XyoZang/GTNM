@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 #/usr/bin/python3
-import sys 
-sys.path.append("../data_processing/") 
 
 import tensorflow as tf
 import os
@@ -9,11 +7,11 @@ import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 tf.compat.v1.disable_eager_execution()
 # from new_data_loader import *
-from model_invoked import Transformer
-from extract_data_subword import *
-from utils import save_hparams, save_variable_specs, get_hypotheses, calc_bleu
+from model.model_invoked import Transformer
+from data_processing.extract_data_subword import *
+from model.utils import save_hparams, save_variable_specs, get_hypotheses, calc_bleu
 import os
-from hparams import Hparams
+from model.hparams import Hparams
 import math
 import logging
 

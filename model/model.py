@@ -12,9 +12,9 @@ import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 tf.compat.v1.disable_eager_execution()
 
-from new_data_loader import *
-from extract_data import *
-from modules import get_token_embeddings, ff, positional_encoding, multihead_attention, label_smoothing, noam_scheme
+from data_processing.new_data_loader import *
+from data_processing.extract_data import *
+from model.modules import get_token_embeddings, ff, positional_encoding, multihead_attention, label_smoothing, noam_scheme
 from utils import convert_idx_to_token_tensor
 #from tqdm import tqdm
 import logging
