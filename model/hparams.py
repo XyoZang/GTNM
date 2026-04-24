@@ -6,12 +6,12 @@ class Hparams:
     # parser.add_argument('--vocab_size', default=50000, type=int)
     parser.add_argument('--gpu', default='0', help='gpu id')
 
-    parser.add_argument('--sub_word_vocab_file', default='/data4/liufang/GTNM/data_processing/sub_token_w2id.txt',
+    parser.add_argument('--sub_word_vocab_file', default='data_processing/sub_token_w2id.txt',
                         help="vocabulary file path")
-    parser.add_argument('--doc_vocab_file', default='/data4/liufang/GTNM/data_processing/doc_w2id.txt',
+    parser.add_argument('--doc_vocab_file', default='data_processing/doc_w2id.txt',
                         help="vocabulary file path")
-    
-    parser.add_argument('--data_path', default='/data4/liufang/GTNM/',
+
+    parser.add_argument('--data_path', default='./',
                         help="data path")
 
     # training scheme
@@ -20,10 +20,10 @@ class Hparams:
 
     parser.add_argument('--lr', default=0.0001, type=float, help="learning rate")
     parser.add_argument('--warmup_steps', default=4000, type=int)
-    parser.add_argument('--logdir', default="/data4/liufang/GTNM/saved", help="log directory")
+    parser.add_argument('--logdir', default="saved", help="log directory")
     parser.add_argument('--num_epochs', default=50, type=int)
     parser.add_argument('--save_epochs', default=3, type=int)
-    parser.add_argument('--evaldir', default="/data4/liufang/GTNM/", help="evaluation dir")
+    parser.add_argument('--evaldir', default="./", help="evaluation dir")
 
     parser.add_argument('--body_context_size', default=55, type=int,
                         help="body_context_size")

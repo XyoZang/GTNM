@@ -28,9 +28,9 @@ def get_project_data(path):
     
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='merge projects.')
-    parser.add_argument("--data_path", type=str, default="/data2/liufang/datasets_javam/java-small",
+    parser.add_argument("--data_path", type=str, default="../datasets_javam/java-small",
                         help="file path")
-    parser.add_argument("--save_path", type=str, default="/data4/liufang/GTNM/small-raw/",
+    parser.add_argument("--save_path", type=str, default="data_processed/",
                         help="save path")
     args = parser.parse_args()
 

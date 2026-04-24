@@ -619,25 +619,25 @@ def parse_args():
     parser.add_argument(
         "--sub_vocab_file",
         type=str,
-        default="/data4/liufang/GTNM/data_processing/sub_token_w2id.txt",
+        default="data_processing/sub_token_w2id.txt",
         help="Path to sub word vocabulary file",
     )
     parser.add_argument(
         "--doc_vocab_file",
         type=str,
-        default="/data4/liufang/GTNM/data_processing/doc_w2id.txt",
+        default="data_processing/doc_w2id.txt",
         help="Path to documentation vocabulary file",
     )
     parser.add_argument(
         "--input_file_name",
         type=str, 
-        default="/data4/liufang/GTNM/small-raw/java-small-train_all.pkl",
+        default="data_processed/java-small-train_all.pkl",
         help="Input file name",
     )
     parser.add_argument(
         "--output_file_name",
         type=str,
-        default="/data4/liufang/GTNM/small-raw/saved/train",
+        default="data_processed/saved/train",
         help="Output file name",
     )
     parser.add_argument(
@@ -700,7 +700,7 @@ if __name__ == "__main__":
         include_docstring=add_doc, 
         expr_max_len=expr_max_len, 
         expr_max_num=expr_max_num,
-        datapath = "/data4/liufang/GTNM/"
+        datapath = "./"
     )
 
     # processor.read_results(output_file_name)
