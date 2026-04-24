@@ -7,6 +7,10 @@ https://www.github.com/kyubyong/transformer
 Transformer network
 '''
 import tensorflow as tf
+import os
+
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+tf.compat.v1.disable_eager_execution()
 
 # from new_data_loader import *
 from extract_data_subword import *
@@ -51,16 +55,16 @@ class Transformer:
         self.doc_embeddings = get_doc_embeddings(len(self.data.doc_w2id), self.hp.d_model, zero_pad=True)
 
         # encoder part
-        self.body_batch = tf.placeholder(tf.int32, [hp.batch_size, None], name='body_batch')
-        self.pro_batch = tf.placeholder(tf.int32, [hp.batch_size, None], name='pro_batch')
-        self.doc_batch = tf.placeholder(tf.int32, [hp.batch_size, None], name='doc_batch')
-        self.invoked_batch = tf.placeholder(tf.float32, [hp.batch_size, None], name='invoked_batch')
+        self.body_batch = tf.compat.v1.placeholder(tf.int32, [hp.batch_size, None], name='body_batch')
+        self.pro_batch = tf.compat.v1.placeholder(tf.int32, [hp.batch_size, None], name='pro_batch')
+        self.doc_batch = tf.compat.v1.placeholder(tf.int32, [hp.batch_size, None], name='doc_batch')
+        self.invoked_batch = tf.compat.v1.placeholder(tf.float32, [hp.batch_size, None], name='invoked_batch')
 
         # self._enc_lens = tf.placeholder(tf.int32, [hp.batch_size], name='enc_lens')
 
         # decoder part
-        self.dec_inp_batch = tf.placeholder(tf.int32, [hp.batch_size, self.data.tgt_name_len], name='dec_batch')
-        self.dec_tgt_batch = tf.placeholder(tf.int32, [hp.batch_size, self.data.tgt_name_len], name='target_batch')
+        self.dec_inp_batch = tf.compat.v1.placeholder(tf.int32, [hp.batch_size, self.data.tgt_name_len], name='dec_batch')
+        self.dec_tgt_batch = tf.compat.v1.placeholder(tf.int32, [hp.batch_size, self.data.tgt_name_len], name='target_batch')
         # self._dec_padding_mask = tf.placeholder(tf.float32, [hp.batch_size, hp.max_dec_steps], name='dec_padding_mask')
 
     def encode(self, training=True):
@@ -68,7 +72,7 @@ class Transformer:
         Returns
         memory: encoder outputs. (N, T1, d_model)
         '''
-        with tf.variable_scope("encoder", reuse=tf.AUTO_REUSE):
+        with tf.compat.v1.variable_scope("encoder", reuse=tf.compat.v1.AUTO_REUSE):
             body_x, pro_x, doc_x = self.body_batch, self.pro_batch, self.doc_batch
             if self.hp.pro:
                 self.concat_x = tf.concat((pro_x, body_x), -1)
@@ -85,7 +89,7 @@ class Transformer:
                 cxt_enc *= self.hp.d_model**0.5 # scale
 
                 cxt_enc += positional_encoding(cxt_enc, self.data.project_context_size)
-                cxt_enc = tf.layers.dropout(cxt_enc, self.hp.dropout_rate, training=training)
+                cxt_enc = tf.compat.v1.layers.dropout(cxt_enc, self.hp.dropout_rate, training=training)
 
             else:
                 src_masks = tf.math.equal(body_x, self.data.PAD) # (N, T1)
@@ -101,7 +105,7 @@ class Transformer:
             doc_enc *= self.hp.d_model**0.5 # scale
 
             doc_enc += positional_encoding(doc_enc, self.data.doc_context_size)
-            doc_enc = tf.layers.dropout(doc_enc, self.hp.dropout_rate, training=training)
+            doc_enc = tf.compat.v1.layers.dropout(doc_enc, self.hp.dropout_rate, training=training)
 
             enc = tf.concat((enc, doc_enc), 1)
             src_masks = tf.concat((src_masks, doc_src_masks), -1)
@@ -113,11 +117,11 @@ class Transformer:
             # cxt_enc = tf.layers.dropout(cxt_enc, self.hp.dropout_rate, training=training)
 
 
-            enc = tf.layers.dropout(enc, self.hp.dropout_rate, training=training)
+            enc = tf.compat.v1.layers.dropout(enc, self.hp.dropout_rate, training=training)
 
             ## Blocks
             for i in range(self.hp.num_blocks):
-                with tf.variable_scope("num_blocks_{}".format(i), reuse=tf.AUTO_REUSE):
+                with tf.compat.v1.variable_scope("num_blocks_{}".format(i), reuse=tf.compat.v1.AUTO_REUSE):
                     # self-attention
                     enc = multihead_attention(queries=enc,
                                               keys=enc,
@@ -133,7 +137,7 @@ class Transformer:
             if self.hp.pro:
                 ## Blocks
                 for i in range(self.hp.num_blocks):
-                    with tf.variable_scope("cxt_num_blocks_{}".format(i), reuse=tf.AUTO_REUSE):
+                    with tf.compat.v1.variable_scope("cxt_num_blocks_{}".format(i), reuse=tf.compat.v1.AUTO_REUSE):
                         # self-attention
                         cxt_enc = multihead_attention(queries=cxt_enc,
                                                 keys=cxt_enc,
@@ -171,7 +175,7 @@ class Transformer:
         '''
         memory, pro_memory = memorys
         src_masks, pro_src_masks = masks
-        with tf.variable_scope("decoder", reuse=tf.AUTO_REUSE):
+        with tf.compat.v1.variable_scope("decoder", reuse=tf.compat.v1.AUTO_REUSE):
             decoder_inputs, y = ys
             # decoder_inputs, y = self.dec_inp_batch, self.dec_tgt_batch
 
@@ -183,11 +187,11 @@ class Transformer:
             dec *= self.hp.d_model ** 0.5  # scale
 
             dec += positional_encoding(dec, self.data.tgt_name_len)
-            dec = tf.layers.dropout(dec, self.hp.dropout_rate, training=training)
+            dec = tf.compat.v1.layers.dropout(dec, self.hp.dropout_rate, training=training)
 
             # Blocks
             for i in range(self.hp.num_blocks):
-                with tf.variable_scope("num_blocks_{}".format(i), reuse=tf.AUTO_REUSE):
+                with tf.compat.v1.variable_scope("num_blocks_{}".format(i), reuse=tf.compat.v1.AUTO_REUSE):
                     # Masked self-attention (Note that causality is True at this time)
                     dec = multihead_attention(queries=dec,
                                               keys=dec,
@@ -238,7 +242,7 @@ class Transformer:
         # Final linear projection (embedding weights are shared)
         weights = tf.transpose(self.embeddings) # (d_model, vocab_size)
         logits = tf.einsum('ntd,dk->ntk', dec, weights) # (N, T2, vocab_size)
-        y_hat = tf.to_int32(tf.argmax(logits, axis=-1))
+        y_hat = tf.cast(tf.argmax(logits, axis=-1), tf.int32)
 
         return logits, y_hat, y
 
@@ -257,13 +261,13 @@ class Transformer:
 
         # train scheme
         y_ = label_smoothing(tf.one_hot(y, depth=len(self.data.w2id)))
-        ce = tf.nn.softmax_cross_entropy_with_logits_v2(logits=logits, labels=y_)
-        nonpadding = tf.to_float(tf.not_equal(y, self.data.PAD))  # 0: <pad>
+        ce = tf.nn.softmax_cross_entropy_with_logits(logits=logits, labels=y_)
+        nonpadding = tf.cast(tf.not_equal(y, self.data.PAD), tf.float32)  # 0: <pad>
         loss = tf.reduce_sum(ce * nonpadding) / (tf.reduce_sum(nonpadding) + 1e-7)
 
-        global_step = tf.train.get_or_create_global_step()
+        global_step = tf.compat.v1.train.get_or_create_global_step()
         lr = noam_scheme(self.hp.lr, global_step, self.hp.warmup_steps)
-        optimizer = tf.train.AdamOptimizer(lr)
+        optimizer = tf.compat.v1.train.AdamOptimizer(lr)
         train_op = optimizer.minimize(loss, global_step=global_step)
 
         tf.summary.scalar('lr', lr)

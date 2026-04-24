@@ -8,6 +8,10 @@ Utility functions
 '''
 
 import tensorflow as tf
+import os
+
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+tf.compat.v1.disable_eager_execution()
 # from tensorflow.python import pywrap_tensorflow
 # import numpy as np
 import json
@@ -50,7 +54,7 @@ def convert_idx_to_token_tensor(inputs, idx2token):
     def my_func(inputs):
         return " ".join(idx2token[elem] for elem in inputs)
 
-    return tf.py_func(my_func, [inputs], tf.string)
+    return tf.compat.v1.py_func(my_func, [inputs], tf.string)
 
 # # def pad(x, maxlen):
 # #     '''Pads x, list of sequences, and make it as a numpy array.
@@ -130,7 +134,7 @@ def save_variable_specs(fpath):
         return size
 
     params, num_params = [], 0
-    for v in tf.global_variables():
+    for v in tf.compat.v1.global_variables():
         params.append("{}==={}".format(v.name, v.shape))
         num_params += _get_size(v.shape)
     print("num_params: ", num_params)

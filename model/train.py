@@ -4,6 +4,10 @@ import sys
 sys.path.append("../data_processing/") 
 
 import tensorflow as tf
+import os
+
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+tf.compat.v1.disable_eager_execution()
 # from new_data_loader import *
 from model_invoked import Transformer
 from  extract_data_subword import *
@@ -68,13 +72,13 @@ def train():
     y_hat = m.eval()
 
     logging.info("# Session")
-    saver = tf.train.Saver(max_to_keep=hp.save_epochs)
-    with tf.Session() as sess:
-        sess.run(tf.global_variables_initializer())
-        ckpt = tf.train.latest_checkpoint(hp.logdir)
+    saver = tf.compat.v1.train.Saver(max_to_keep=hp.save_epochs)
+    with tf.compat.v1.Session() as sess:
+        sess.run(tf.compat.v1.global_variables_initializer())
+        ckpt = tf.compat.v1.train.latest_checkpoint(hp.logdir)
         if ckpt is None:
             logging.info("Initializing from scratch")
-            sess.run(tf.global_variables_initializer())
+            sess.run(tf.compat.v1.global_variables_initializer())
             save_variable_specs(os.path.join(hp.logdir, "specs"))
         else:
             saver.restore(sess, ckpt)
@@ -117,6 +121,6 @@ def main(_):
     train()
 
 if __name__ == '__main__':
-    tf.app.run()
+    tf.compat.v1.app.run()
 
 
