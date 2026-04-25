@@ -37,7 +37,7 @@ def test():
     saver = tf.compat.v1.train.Saver(max_to_keep=hp.save_epochs)
     with tf.compat.v1.Session() as sess:
         sess.run(tf.compat.v1.global_variables_initializer())
-        ckpt = tf.compat.v1.train.latest_checkpoint(hp.logdir)
+        ckpt = tf.compat.v1.train.latest_checkpoint(hp.ckpt_dir)
         saver.restore(sess, ckpt)
 
         summary_writer = tf.compat.v1.summary.FileWriter(hp.logdir, sess.graph)

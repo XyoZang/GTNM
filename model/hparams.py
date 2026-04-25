@@ -9,6 +9,8 @@ class Hparams:
     dir_prefix = 'saved/'
     # 不同模型保存目录
     model_dir = dir_prefix + 'train_with_no_pro_doc/'
+    # 检查点目录
+    ckpt_dir = 'ckpt/'
     # 训练轮数
     num_epochs = 3
     # 训练批次大小
@@ -53,7 +55,7 @@ class Hparams:
     parser.add_argument('--res_log', default=model_dir+'res.txt', help="result dir")
 
     # ========== 检查点文件路径 ==========
-    parser.add_argument('--ckpt', default=model_dir, help="checkpoint file path")
+    parser.add_argument('--ckpt_dir', default=model_dir+ckpt_dir, help="checkpoint file path")
 
     # ======================== 可配置项 ========================
 

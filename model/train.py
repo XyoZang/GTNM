@@ -73,7 +73,7 @@ def train():
     saver = tf.compat.v1.train.Saver(max_to_keep=hp.save_epochs)
     with tf.compat.v1.Session() as sess:
         sess.run(tf.compat.v1.global_variables_initializer())
-        ckpt = tf.compat.v1.train.latest_checkpoint(hp.logdir)
+        ckpt = tf.compat.v1.train.latest_checkpoint(hp.ckpt_dir)
         if ckpt is None:
             logging.info("Initializing from scratch")
             sess.run(tf.compat.v1.global_variables_initializer())
@@ -104,7 +104,7 @@ def train():
                 model_output = "java_E%02dL%.2f" % (i, train_loss)
         
                 logging.info("# save models")
-                ckpt_name = os.path.join(hp.logdir, model_output)
+                ckpt_name = os.path.join(hp.ckpt_dir, model_output)
                 saver.save(sess, ckpt_name, global_step=_global_step)
                 logging.info("after training of {} epochs, {} has been saved.".format(i, ckpt_name))
 
