@@ -454,7 +454,8 @@ class localContext(object):
         # print("avg cross file methods len: {}, med cross file methods len: {}".format(np.average(cross_file_cxt_len), np.median(cross_file_cxt_len)))
         print("writing...")
         pickle.dump(body_samples, open(ofilename+"_body.pkl", "wb"))
-        pickle.dump(doc_samples, open(ofilename+"_doc.pkl", "wb"))
+        if self.docstring:
+            pickle.dump(doc_samples, open(ofilename+"_doc.pkl", "wb"))
         pickle.dump(project_cxt_samples, open(ofilename+"_pro.pkl", "wb"))
         pickle.dump(tags, open(ofilename+"_tag.pkl", "wb"))
     
@@ -566,7 +567,16 @@ class localContext(object):
     def batch_iter(self, batch_size, state, epoch=None, shuffle=True, seed=12345):
         body_data = pickle.load(open(os.path.join(self.datapath, state+"_body.pkl"), "rb"))
         pro_data = pickle.load(open(os.path.join(self.datapath, state+"_pro.pkl"), "rb"))
-        doc_data = pickle.load(open(os.path.join(self.datapath, state+"_doc.pkl"), "rb"))
+        if self.docstring:
+            doc_file = os.path.join(self.datapath, state+"_doc.pkl")
+            if not os.path.exists(doc_file):
+                raise FileNotFoundError(
+                    f"Doc file '{doc_file}' not found. "
+                    f"Either run preprocessing with --docstring flag, or set --use_docstring=False during training."
+                )
+            doc_data = pickle.load(open(doc_file, "rb"))
+        else:
+            doc_data = [[0] * self.doc_context_size for _ in range(len(body_data))]
         invoked_data = pickle.load(open(os.path.join(self.datapath, state+"_invoked.pkl"), "rb"))
         target_data = pickle.load(open(os.path.join(self.datapath, state+"_tag.pkl"), "rb"))
 
@@ -609,7 +619,7 @@ class localContext(object):
 
         body_data = self.pad_data(body_data, self.body_context_size)
         pro_data = self.pad_data(pro_data, self.project_context_size, True)
-        doc_data = self.pad_data(pro_data, self.doc_context_size, True)
+        doc_data = self.pad_data(doc_data, self.doc_context_size, True)
         invoked_data = self.pad_invoked_data(invoked_data, self.project_context_size, True)
         dec_inp_data = self.pad_data(dec_inp_data, self.tgt_name_len)
         dec_tgt_data = self.pad_data(dec_tgt_data, self.tgt_name_len)

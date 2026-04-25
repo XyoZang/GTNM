@@ -34,8 +34,11 @@ class Hparams:
     parser.add_argument('--tgt_name_size', default=5, type=int,
                         help="tgt_name_size")
 
-    parser.add_argument('--pro', default=False, type=bool, 
+    parser.add_argument('--pro', default=False, type=bool,
                         help="whether to use project-specific info")
+
+    parser.add_argument('--use_docstring', default=False, type=bool,
+                        help="whether to use docstring information")
 
     # model
     parser.add_argument('--d_model', default=512, type=int,

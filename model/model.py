@@ -38,13 +38,13 @@ class Transformer:
         self.hp = hp
         # self.data = data_loader(hp.data_path, hp.data_path)
         self.data = localContext(
-        hp.body_context_size, 
+        hp.body_context_size,
         hp.doc_context_size,
         hp.project_context_size,
         hp.tgt_name_size,
-        hp.vocab_file, 
-        include_docstring=True, 
-        expr_max_len=1024, 
+        hp.vocab_file,
+        include_docstring=hp.use_docstring,
+        expr_max_len=1024,
         expr_max_num=30,
         datapath = hp.data_path
     )

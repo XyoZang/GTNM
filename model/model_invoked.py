@@ -38,21 +38,22 @@ class Transformer:
         self.hp = hp 
         # self.data = data_loader(hp.data_path, hp.data_path)
         self.data = localContext(
-        hp.body_context_size, 
-        hp.doc_context_size, 
+        hp.body_context_size,
+        hp.doc_context_size,
         hp.project_context_size,
         hp.tgt_name_size,
-        # hp.vocab_file, 
-        hp.sub_word_vocab_file, 
-        hp.doc_vocab_file, 
-        include_docstring=True, 
-        expr_max_len=1024, 
+        # hp.vocab_file,
+        hp.sub_word_vocab_file,
+        hp.doc_vocab_file,
+        include_docstring=hp.use_docstring,
+        expr_max_len=1024,
         expr_max_num=30,
         datapath = hp.data_path
     )
 
         self.embeddings = get_token_embeddings(len(self.data.w2id), self.hp.d_model, zero_pad=True)
-        self.doc_embeddings = get_doc_embeddings(len(self.data.doc_w2id), self.hp.d_model, zero_pad=True)
+        if hp.use_docstring:
+            self.doc_embeddings = get_doc_embeddings(len(self.data.doc_w2id), self.hp.d_model, zero_pad=True)
 
         # encoder part
         self.body_batch = tf.compat.v1.placeholder(tf.int32, [hp.batch_size, None], name='body_batch')
@@ -100,15 +101,16 @@ class Transformer:
                 enc *= self.hp.d_model**0.5 # scale
                 enc += positional_encoding(enc, self.data.body_context_size)
 
-            doc_src_masks = tf.math.equal(doc_x, 0) # (N, T1)
-            doc_enc = tf.nn.embedding_lookup(self.doc_embeddings, doc_x) # (N, T1, d_model)
-            doc_enc *= self.hp.d_model**0.5 # scale
+            if self.hp.use_docstring:
+                doc_src_masks = tf.math.equal(doc_x, 0) # (N, T1)
+                doc_enc = tf.nn.embedding_lookup(self.doc_embeddings, doc_x) # (N, T1, d_model)
+                doc_enc *= self.hp.d_model**0.5 # scale
 
-            doc_enc += positional_encoding(doc_enc, self.data.doc_context_size)
-            doc_enc = tf.compat.v1.layers.dropout(doc_enc, self.hp.dropout_rate, training=training)
+                doc_enc += positional_encoding(doc_enc, self.data.doc_context_size)
+                doc_enc = tf.compat.v1.layers.dropout(doc_enc, self.hp.dropout_rate, training=training)
 
-            enc = tf.concat((enc, doc_enc), 1)
-            src_masks = tf.concat((src_masks, doc_src_masks), -1)
+                enc = tf.concat((enc, doc_enc), 1)
+                src_masks = tf.concat((src_masks, doc_src_masks), -1)
 
             # cxt_enc = tf.nn.embedding_lookup(self.embeddings, pro_x) # (N, T1, d_model)
             # cxt_enc *= self.hp.d_model**0.5 # scale
