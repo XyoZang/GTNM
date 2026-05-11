@@ -1,5 +1,6 @@
 import pickle
 import os
+import argparse
 from tqdm import tqdm
 
 def extract_invoked_data(data_path, prefix):
@@ -19,4 +20,11 @@ def extract_invoked_data(data_path, prefix):
         invoked.append(invoked_data)
     pickle.dump(invoked, open(os.path.join(data_path, prefix+'_invoked.pkl'), "wb"))
 
-extract_invoked_data('./', 'train_subword')
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description='Extract invoked mask for project context.')
+    parser.add_argument("--data_path", type=str, default="./",
+                        help="dir to save the final data for training and evaluation")
+    parser.add_argument("--prefix", type=str, default="train_subword",
+                        help="data prefix, for example: train_subword")
+    args = parser.parse_args()
+    extract_invoked_data(args.data_path, args.prefix)

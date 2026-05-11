@@ -5,20 +5,27 @@ class Hparams:
     # parser.add_argument('--vocab_size', default=50000, type=int)
     parser.add_argument('--gpu', default='0', help='gpu id')
     
+
+    # 数据集名称
+    dataset_name = "java-large/"
+    # 训练数据路径
+    train_dir = "data_processed/"+dataset_name
+    # 验证数据路径
+    eval_dir = "data_processed/"+dataset_name
+    # 测试数据路径
+    test_dir = "data_processed/"+dataset_name
     # 模型训练保存基础目录
-    dir_prefix = 'saved/'
+    dir_prefix = 'saved/'+dataset_name
     # 不同模型保存目录
-    model_dir = dir_prefix + 'train_with_no_pro_doc/'
-    # 检查点目录
-    ckpt_dir = 'ckpt/'
+    model_dir = dir_prefix + 'train_with_pro_with_doc/'
     # 训练轮数
-    num_epochs = 3
+    num_epochs = 50
     # 训练批次大小
     batch_size = 64
     # 是否使用项目特定信息
-    use_project_info = False
+    use_project_info = True
     # 是否使用文档特定信息
-    use_docstring = False
+    use_docstring = True
 
     '''
     以下为可配置项，其他参数不建议修改！！！
@@ -37,7 +44,7 @@ class Hparams:
     # 保存轮数
     parser.add_argument('--save_epochs', default=3, type=int)
     # 验证目录
-    parser.add_argument('--evaldir', default="data_processed/", help="evaluation dir")
+    parser.add_argument('--evaldir', default=eval_dir, help="evaluation dir")
 
     # 是否使用项目特定信息
     parser.add_argument('--pro', default=use_project_info, type=bool,
@@ -50,12 +57,12 @@ class Hparams:
     # 测试批次大小
     parser.add_argument('--test_batch_size', default=128, type=int)
     # 测试目录
-    parser.add_argument('--testdir', default="data_processed/", help="test result dir")
+    parser.add_argument('--testdir', default=test_dir, help="test result dir")
     # 结果目录
     parser.add_argument('--res_log', default=model_dir+'res.txt', help="result dir")
 
     # ========== 检查点文件路径 ==========
-    parser.add_argument('--ckpt_dir', default=model_dir+ckpt_dir, help="checkpoint file path")
+    parser.add_argument('--ckpt_dir', default=model_dir+'ckpt/', help="checkpoint file path")
 
     # ======================== 可配置项 ========================
 
@@ -66,7 +73,7 @@ class Hparams:
     parser.add_argument('--doc_vocab_file', default='data_processing/doc_w2id.txt',
                         help="vocabulary file path")
     # 训练数据路径
-    parser.add_argument('--data_path', default='data_processed/',
+    parser.add_argument('--data_path', default=train_dir,
                         help="data path")
 
     '''
