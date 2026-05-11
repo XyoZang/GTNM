@@ -14,6 +14,13 @@ Implementation for the ICSE 2022 paper "Learning to Recommend Method Names with 
     --data_path: project data dir
     --save_path: dir to save the project information data (`java-train.pkl, java-eval.pkl, java-test.pkl`)
     ```
+    for examole:
+    ```
+    python data_processing/merge_project.py \
+        --data_name java-large \
+        --data_path java_data/java-large/ \
+        --save_path data_processed/
+    ```
 
 2. run `processor.py` to get code schema and cross project information
     ```

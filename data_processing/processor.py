@@ -9,7 +9,7 @@ import json
 import re
 import argparse
 from tree_sitter import Parser, Language
-from data_processing.java_parser import JavaParser
+from java_parser import JavaParser
 import pathos
 
 Language.build_library(
@@ -18,12 +18,12 @@ Language.build_library(
 
   # Include one or more languages
   [
-    'tree-sitter-java',
+    'data_processing/tree-sitter-java',
   ]
 )
 
 JAVAPARSER = Parser()
-JAVAPARSER.set_language(Language("my-languages.so", "java"))
+JAVAPARSER.set_language(Language("data_processing/my-languages.so", "java"))
 jp = JavaParser(parser=JAVAPARSER)
 
 PARSER = None

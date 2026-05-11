@@ -9,7 +9,7 @@ import sentencepiece as spm
 import numpy as np
 from collections import OrderedDict
 from pathos import multiprocessing
-from data_processing.normalizer import Normalizer
+from normalizer import Normalizer
 import os
 import argparse
 import logging
@@ -566,7 +566,7 @@ class localContext(object):
 
         body_data = self.pad_data(body_data, self.body_context_size)
         pro_data = self.pad_data(pro_data, self.project_context_size, True)
-        doc_data = self.pad_data(pro_data, self.doc_context_size, True)
+        doc_data = self.pad_data(doc_data, self.doc_context_size, True)
         invoked_data = self.pad_invoked_data(invoked_data, self.project_context_size, True)
         dec_inp_data = self.pad_data(dec_inp_data, self.tgt_name_len)
         dec_tgt_data = self.pad_data(dec_tgt_data, self.tgt_name_len)

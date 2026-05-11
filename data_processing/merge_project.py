@@ -30,7 +30,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='merge projects.')
     parser.add_argument("--data_name", type=str, default="java-med",
                         help="data name")      
-    parser.add_argument("--data_path", type=str, default="java_data/"+args.data_name+"/",
+    parser.add_argument("--data_path", type=str, default="java_data/java-med/",
                         help="file path")
     parser.add_argument("--save_path", type=str, default="data_processed/",
                         help="save path")              
@@ -49,6 +49,6 @@ if __name__ == "__main__":
     projects = os.listdir(os.path.join(args.data_path, "test"))
     for project_name in tqdm(projects):
         test_data.append(get_project_data(os.path.join(args.data_path, "test", project_name)))
-    pickle.dump(train_data, open(args.save_path+args.data_name+'-train.pkl', "wb"))
-    pickle.dump(eval_data, open(args.save_path+args.data_name+'-eval.pkl', "wb"))
-    pickle.dump(test_data, open(args.save_path+args.data_name+'-test.pkl', "wb"))
+    pickle.dump(train_data, open(args.save_path+args.data_name+'/'+args.data_name+'-train.pkl', "wb"))
+    pickle.dump(eval_data, open(args.save_path+args.data_name+'/'+args.data_name+'-eval.pkl', "wb"))
+    pickle.dump(test_data, open(args.save_path+args.data_name+'/'+args.data_name+'-test.pkl', "wb"))
