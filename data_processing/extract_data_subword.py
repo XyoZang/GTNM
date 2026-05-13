@@ -9,7 +9,7 @@ import sentencepiece as spm
 import numpy as np
 from collections import OrderedDict
 from pathos import multiprocessing
-from data_processing.normalizer import Normalizer
+from normalizer import Normalizer
 import os
 import argparse
 import logging
@@ -337,8 +337,8 @@ class localContext(object):
             # overlap += len(list(set(encoded_name).intersection(set(encoded_import_context)))) > 0
             overlap += len(list(set(encoded_name).intersection(set(encoded_import_context))))
         return body, project_level_cxt, doc, tags, overlap
-
-    @set_timeout(60, after_timeout)
+    
+    @set_timeout(180, after_timeout)
     def process_one_file(self, data):
         body_samples = []
         doc_samples = []
