@@ -9,7 +9,7 @@ import sentencepiece as spm
 import numpy as np
 from collections import OrderedDict
 from pathos import multiprocessing
-from normalizer import Normalizer
+from data_processing.normalizer import Normalizer
 import os
 import argparse
 import logging
