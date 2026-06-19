@@ -22,6 +22,8 @@ class Hparams:
     num_epochs = 50
     # 训练批次大小
     batch_size = 64
+    # 学习率
+    lr = 0.0001
     # 是否使用项目特定信息
     use_project_info = True
     # 是否使用文档特定信息
@@ -81,7 +83,7 @@ class Hparams:
     '''
     # ====================== 以下配置项不建议修改 ======================
     # 学习率相关
-    parser.add_argument('--lr', default=0.0001, type=float, help="learning rate")
+    parser.add_argument('--lr', default=lr, type=float, help="learning rate")
     # 预热步数
     parser.add_argument('--warmup_steps', default=4000, type=int)
     # ========== 上下文大小 ==========
